@@ -5,4 +5,4 @@
 .buildpath
 .project
 .settings
-.sublime-*
+*.sublime-*
