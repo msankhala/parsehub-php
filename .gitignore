@@ -1,1 +1,8 @@
 /vendor/
+/*.tgz
+/dist/
+/vendor/
+.buildpath
+.project
+.settings
+.sublime-*
