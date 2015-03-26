@@ -1,0 +1,22 @@
+{
+    "name": "msankhala/parsehub-php",
+    "description": "Php wrapper classes for Parsehub REST api.",
+    "homepage": "http://github.com/nategood/httpful",
+    "license": "MIT",
+    "keywords": ["http", "curl", "rest", "restful", "api", "parsehub"],
+    "require": {
+        "nategood/httpful": "0.2.*",
+        "netresearch/jsonmapper": "0.5.*"
+    },
+    "authors": [
+        {
+            "name": "Mahesh Sankhala",
+            "email": "mahesh.saini@srijan.in"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "Parsehub": "src/"
+        }
+    }
+}
