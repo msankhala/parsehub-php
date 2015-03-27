@@ -272,7 +272,7 @@ class ParsehubRun
      */
     public function getStartValue()
     {
-        return json_decode($this->start_value);
+        return json_decode($this->start_value, true);
     }
 
     /**

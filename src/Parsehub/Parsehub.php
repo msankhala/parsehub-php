@@ -14,15 +14,19 @@ class Parsehub
     /**
      * @var string
      */
-    private $api_key = '';
+    private $api_key;
 
-    protected $projects = array();
+    /**
+     * @var string
+     */
+    public $projects;
 
     /**
      * \Httpful\Request object to make restful request.
      * @var \Httpful\Request
      */
     public $RESTful;
+
     /**
      * constructor.
      */
@@ -59,7 +63,7 @@ class Parsehub
     /**
      * Sets the value of projects.
      *
-     * @param mixed $projects the projects
+     * @param string $projects the projects
      *
      * @return self
      */
@@ -94,8 +98,8 @@ class Parsehub
     {
         $response = $this->RESTful->send();
         $mapper = new JsonMapper();
-        $body = json_decode($response->body, true);
-        $data = $mapper->mapArray($body['projects'], array(), 'Parsehub\ParsehubProject');
+        $body = json_decode($response->body);
+        $data = $mapper->mapArray($body->projects, array(), 'Parsehub\ParsehubProject');
         return $data;
     }
 }

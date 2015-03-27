@@ -177,17 +177,17 @@ class ParsehubProject
      */
     public function getOptionsJson()
     {
-        return $this->options_json;
+        return json_decode($this->options_json, true);
     }
 
     /**
      * Sets the options for parsehub carwler.
      *
-     * @param array $options_json the options json
+     * @param string $options_json the options json
      *
      * @return self
      */
-    public function setOptionsJson(array $options_json)
+    public function setOptionsJson($options_json)
     {
         $this->options_json = $options_json;
 
@@ -278,7 +278,7 @@ class ParsehubProject
      */
     public function getTemplatesJson()
     {
-        return json_decode($this->templates_json);
+        return json_decode($this->templates_json, true);
     }
 
     /**
