@@ -1,5 +1,5 @@
 <?php
-namespace Parsehub\interfaces;
+namespace Parsehub\Interfaces;
 
 /**
  * Interface providing common method which adpater can implement.

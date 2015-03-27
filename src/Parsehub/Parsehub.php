@@ -5,6 +5,7 @@ use Httpful\Request;
 use Parsehub\ParsehubProject;
 use Parsehub\ParsehubRun;
 use JsonMapper;
+use Parsehub\AHTTPful;
 
 /**
  * Parsehub wrapper class.
@@ -25,14 +26,14 @@ class Parsehub
      * \Httpful\Request object to make restful request.
      * @var \Httpful\Request
      */
-    public $RESTful;
+    // public $RESTful;
 
     /**
      * constructor.
      */
-    public function __construct(\Httpful\Request $RESTful)
+    public function __construct()
     {
-        $this->RESTful = $RESTful;
+        // $this->RESTful = $RESTful;
     }
 
 
@@ -96,9 +97,16 @@ class Parsehub
 
     public function getCrawlerList()
     {
-        $response = $this->RESTful->send();
-        $mapper = new JsonMapper();
+        // $response = $this->RESTful->send();
+        // $mapper = new JsonMapper();
+        // $body = json_decode($response->body);
+        // $data = $mapper->mapArray($body->projects, array(), 'Parsehub\ParsehubProject');
+        // return $data;
+        $url = 'https://www.parsehub.com/api/v2/projects?' . 'api_key=tS-CGrbH1aWL0xaHyb4TrHkm';
+        $restful = new AHTTPful();
+        $response = $restful->get($url);
         $body = json_decode($response->body);
+        $mapper = $restful->getJsonmapper();
         $data = $mapper->mapArray($body->projects, array(), 'Parsehub\ParsehubProject');
         return $data;
     }
