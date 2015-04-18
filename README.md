@@ -44,17 +44,17 @@ $crawlerList = $parsehub->getCrawlerList();
 echo $crawlerList;
 ```
 
+```php
+// Get project_token and run_token from DB.
+$project_token = <get project token from db>
+$run_token = <get project token from db>
+```
+
 Get particular Parsehub project, Pass the project_token:
 ```php
 $parsehub = new Parsehub();
 $crawler = $parsehub->getCrawler($project_token);
 echo $crawler;
-```
-
-```php
-// Get project_token and run_token from DB.
-$project_token = <get project token from db>
-$run_token = <get project token from db>
 ```
 
 Get Last ready run Data for a project:
