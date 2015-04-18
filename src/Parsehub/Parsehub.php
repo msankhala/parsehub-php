@@ -167,10 +167,10 @@ class Parsehub
             return $data;
         }
         if ($response->code == 401) {
-            Log::error('Access denied. Not able to run project on parsehub.');
+            self::$logger->error('Access denied. Not able to run project on parsehub.');
         }
         if ($response->code == 400) {
-            Log::error('Bad request. Not able to cancel project on parsehub.');
+            self::$logger->info('Bad request. Not able to cancel project on parsehub.');
         }
     }
 
@@ -196,10 +196,10 @@ class Parsehub
             return $data;
         }
         if ($response->code == 401) {
-            Log::error('Access denied. Not able to cancel project on parsehub.');
+            self::$logger->error('Access denied. Not able to cancel project on parsehub.');
         }
         if ($response->code == 400) {
-            Log::error('Bad request. Not able to cancel project on parsehub.');
+            self::$logger->error('Bad request. Not able to cancel project on parsehub.');
         }
     }
 
