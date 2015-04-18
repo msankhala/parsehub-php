@@ -6,3 +6,7 @@
 .project
 .settings
 *.sublime-*
+.phpintel
+log/parsehub.log
+src/config.php
+index.php
