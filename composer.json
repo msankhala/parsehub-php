@@ -6,7 +6,7 @@
     "keywords": ["http", "curl", "rest", "restful", "api", "parsehub"],
     "require": {
         "nategood/httpful": "0.2.*",
-        "netresearch/jsonmapper": "0.5.*"
+        "monolog/monolog": "~1.13"
     },
     "authors": [
         {
