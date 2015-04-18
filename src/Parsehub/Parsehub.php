@@ -10,7 +10,16 @@ use Monolog\Handler\StreamHandler;
  */
 class Parsehub
 {
+    /**
+     * Parsehub api configuration.
+     * @var array
+     */
     protected static $config = array();
+
+    /**
+     * Monolog logger object for basic logging.
+     * @var Monolog\Logger
+     */
     protected static $logger;
 
     /**
@@ -29,6 +38,11 @@ class Parsehub
         }
     }
 
+    /**
+     * Get a data for a particular run of a parsehub project.
+     * @param  string $run_token run token for which you want to get data.
+     * @return string            json response.
+     */
     public function getCrawlData($run_token)
     {
         $url = $this->getCrawlerDataApiUrl($run_token);
@@ -42,6 +56,11 @@ class Parsehub
         return $response;
     }
 
+    /**
+     * Get the last ready run data for a project
+     * @param  string $project_token project token to get last ready data for project
+     * @return string                json response.
+     */
     public function getLastReadyRunCrawlData($project_token)
     {
         $url = $this->getLastReadyRunDataApiUrl($project_token);
@@ -55,6 +74,11 @@ class Parsehub
         return $response;
     }
 
+    /**
+     * Get a run object for a project.
+     * @param  string $run_token run token whose run object you want to get.
+     * @return string            json response.
+     */
     public function getCrawl($run_token)
     {
         $url = $this->getCrawlApiUrl($run_token);
@@ -63,6 +87,12 @@ class Parsehub
         return $crawler;
     }
 
+    /**
+     * Get a project detail.
+     * @param  string $project_token project token for which project you want 
+     *                               to get information.
+     * @return string                json response.
+     */
     public function getCrawler($project_token)
     {
         $url = $this->getCrawlerApiUrl($project_token);
@@ -71,6 +101,10 @@ class Parsehub
         return $crawler;
     }
 
+    /**
+     * Get list of all the parsehub project.
+     * @return string json response.
+     */
     public function getCrawlerList()
     {
         $url = $this->getCrawlerListApiUrl();
@@ -140,6 +174,11 @@ class Parsehub
         }
     }
 
+    /**
+     * Cancel a running project.
+     * @param  string $run_token run token of a 
+     * @return [type]            run token of canceled run.
+     */
     public function cancelCrawlerRun($run_token)
     {
         $url = $this->getCrawlerRunCancelApiUrl($run_token);
@@ -163,6 +202,11 @@ class Parsehub
             Log::error('Bad request. Not able to cancel project on parsehub.');
         }
     }
+
+    /**
+     * Get parsehub project list api url.
+     * @return string REST api url for parsehub project list.
+     */
     public function getCrawlerListApiUrl()
     {
         $api_key = self::$config['api_key'];
@@ -171,6 +215,11 @@ class Parsehub
         return $url;
     }
 
+    /**
+     * Get parsehub project information api url.
+     * @param  string $project_token project information api url.
+     * @return string                REST api url for parsehub project.
+     */
     public function getCrawlerApiUrl($project_token)
     {
         $api_key = self::$config['api_key'];
@@ -179,6 +228,11 @@ class Parsehub
         return $url;
     }
 
+    /**
+     * Get run information api url.
+     * @param  string $run_token run token of a particular run.
+     * @return string            REST api url for parsehub project run.
+     */
     public function getCrawlApiUrl($run_token)
     {
         $api_key = self::$config['api_key'];
@@ -187,6 +241,11 @@ class Parsehub
         return $url;
     }
 
+    /**
+     * Get crawled data for a run.
+     * @param  string $run_token run token to get data.
+     * @return string            REST api url for parsehub project run data.
+     */
     public function getCrawlerDataApiUrl($run_token)
     {
         $api_key = self::$config['api_key'];
@@ -195,6 +254,12 @@ class Parsehub
         return $url;
     }
 
+    /**
+     * Get Last ready run api url.
+     * @param  string $project_token project for which to get last ready run
+     *                               data.
+     * @return string                REST api url for project last ready run data.
+     */
     public function getLastReadyRunDataApiUrl($project_token)
     {
         $api_key = self::$config['api_key'];
@@ -203,6 +268,13 @@ class Parsehub
         return $url;
     }
 
+    /**
+     * Get crawler run api url
+     * @param  string $project_token project token which project you want to
+     *                               run.
+     * @return string                REST api url for running a parsehub
+     *                               project.
+     */
     public function getCrawlerRunApiUrl($project_token)
     {
         $api_key = self::$config['api_key'];
@@ -211,6 +283,11 @@ class Parsehub
         return $url;
     }
 
+    /**
+     * Cancel a running parsehub project.
+     * @param  string $run_token run token to stop a run.
+     * @return string            REST api url to cancel a run.
+     */
     public function getCrawlerRunCancelApiUrl($run_token)
     {
         $api_key = self::$config['api_key'];
