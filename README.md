@@ -40,8 +40,8 @@ them in your db. When you get a `parsehub project` information you also get the
 Get Parsehub projects list:
 ```php
 $parsehub = new Parsehub();
-$crawlerList = $parsehub->getCrawlerList();
-echo $crawlerList;
+$projectList = $parsehub->getProjectList();
+echo $projectList;
 ```
 
 ```php
@@ -53,22 +53,29 @@ $run_token = <get project token from db>
 Get particular Parsehub project, Pass the project_token:
 ```php
 $parsehub = new Parsehub();
-$crawler = $parsehub->getCrawler($project_token);
-echo $crawler;
+$project = $parsehub->getProject($project_token);
+echo $project;
 ```
 
 Get Last ready run Data for a project:
 ```php
 $parsehub = new Parsehub();
-$data =  $parsehub->getLastReadyRunCrawlData($project_token);
+$data =  $parsehub->getLastReadyRunData($project_token);
 print $data;
 ```
 
 Get data for a particular run, Pass the run token:
 ```php
 $parsehub = new Parsehub();
-$data = $parsehub->getCrawlData($run_token);
+$data = $parsehub->getRunData($run_token);
 print $data;
+```
+
+Get a particular run, Pass the run token:
+```php
+$parsehub = new Parsehub();
+$run = $parsehub->getRun($run_token);
+print $run;
 ```
 
 Run a parsehub project:
@@ -83,13 +90,22 @@ $options = array(
     // Set send_email options. Skip to remain this value default.
     'send_email' => 1,
 );
-$run_obj = $parsehub->runCrawler($project_token, $options);
+$run_obj = $parsehub->runProject($project_token, $options);
 echo $run_obj;
 ```
 Cancel a parsehub project run:
 ```php
 $parsehub = new Parsehub();
-$cancel = $parsehub->cancelCrawlerRun($run_token);
+$cancel = $parsehub->cancelProjectRun($run_token);
 print $cancel;
 ```
-You can check the log in your log file.
+
+Delete a parsehub project run, This will delete the project run and data of that
+run so be careful when using this method, once data deleted for a run, are not
+recoverable:
+```php
+$parsehub = new Parsehub();
+$cancel = $parsehub->deleteProjectRun($run_token);
+print $cancel;
+```
+**You can check the log in your log file.**

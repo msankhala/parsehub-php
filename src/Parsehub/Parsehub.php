@@ -43,9 +43,9 @@ class Parsehub
      * @param  string $run_token run token for which you want to get data.
      * @return string            json response.
      */
-    public function getCrawlData($run_token)
+    public function getRunData($run_token)
     {
-        $url = $this->getCrawlerDataApiUrl($run_token);
+        $url = $this->getRunDataApiUrl($run_token);
         $response = PHPHttpful::get($url)
         ->parseWith(function ($body) {
             // Decode the gzip encoded respose.
@@ -61,7 +61,7 @@ class Parsehub
      * @param  string $project_token project token to get last ready data for project
      * @return string                json response.
      */
-    public function getLastReadyRunCrawlData($project_token)
+    public function getLastReadyRunData($project_token)
     {
         $url = $this->getLastReadyRunDataApiUrl($project_token);
         $response = PHPHttpful::get($url)
@@ -79,12 +79,12 @@ class Parsehub
      * @param  string $run_token run token whose run object you want to get.
      * @return string            json response.
      */
-    public function getCrawl($run_token)
+    public function getRun($run_token)
     {
-        $url = $this->getCrawlApiUrl($run_token);
+        $url = $this->getRunApiUrl($run_token);
         $response = PHPHttpful::get($url)->send();
-        $crawler = $response->body;
-        return $crawler;
+        $run = $response->body;
+        return $run;
     }
 
     /**
@@ -93,28 +93,28 @@ class Parsehub
      *                               to get information.
      * @return string                json response.
      */
-    public function getCrawler($project_token)
+    public function getProject($project_token)
     {
-        $url = $this->getCrawlerApiUrl($project_token);
+        $url = $this->getProjectApiUrl($project_token);
         $response = PHPHttpful::get($url)->send();
-        $crawler = $response->body;
-        return $crawler;
+        $project = $response->body;
+        return $project;
     }
 
     /**
      * Get list of all the parsehub project.
      * @return string json response.
      */
-    public function getCrawlerList()
+    public function getProjectList()
     {
-        $url = $this->getCrawlerListApiUrl();
+        $url = $this->getProjectListApiUrl();
         $response = PHPHttpful::get($url)->send();
-        $crawler_list = $response->body;
-        return $crawler_list;
+        $project_list = $response->body;
+        return $project_list;
     }
 
     /**
-     * Run crawler on parsehub.
+     * Run Project on parsehub.
      * @param  string $project_token project token which you want to run on parsehub.
      * @param  array  $options       Array of options which you want to pass.
      *                               Options can have 
@@ -123,12 +123,12 @@ class Parsehub
      *                               send_email = send email about run status.
      * @return string                run object if run successful otherwise return false.
      */
-    public function runCrawler($project_token, $options = array())
+    public function runProject($project_token, $options = array())
     {
-        $url = $this->getCrawlerRunApiUrl($project_token);
+        $url = $this->getProjectRunApiUrl($project_token);
         $api_key = self::$config['api_key'];
 
-        // Set query parameters to pass to crawler.
+        // Set query parameters to pass to Project.
         $start_url = isset($options['start_url']) ? $options['start_url'] : '';
         $keywords = isset($options['keywords']) ? explode(',', $options['keywords']) : array();
         $send_email = (isset($options['send_email']) && $options['send_email'] == 1) ? $options['send_email'] : 0;
@@ -157,13 +157,23 @@ class Parsehub
         ->body($requestbody)
         ->send();
         if ($response->code == 200) {
-            self::$logger->info('Crawler run successfully on parsehub with values: ', ['context' => array(
-                'start_url' => $start_url,
-                'keywords' => $keywords,
-                'send_email' => $send_email
-            )]);
+            $run_object = json_decode($response->body);
+            if (!isset($run_object->start_time)) {
+                self::$logger->info('Project already running on parsehub with same values: ', ['context' => array(
+                    'start_url' => $start_url,
+                    'keywords' => $keywords,
+                    'send_email' => $send_email,
+                    'run_token' => $run_object->run_token,
+                )]);
+            } else {
+                self::$logger->info('Project run successfully on parsehub with values: ', ['context' => array(
+                    'start_url' => $start_url,
+                    'keywords' => $keywords,
+                    'send_email' => $send_email,
+                    'run_token' => $run_object->run_token,
+                )]);
+            }
             $data = $response->body;
-            // var_dump("Crawler with project token $project_token started on server successfully. run token is");
             return $data;
         }
         if ($response->code == 401) {
@@ -176,12 +186,12 @@ class Parsehub
 
     /**
      * Cancel a running project.
-     * @param  string $run_token run token of a 
+     * @param  string $run_token run token of a project run.
      * @return [type]            run token of canceled run.
      */
-    public function cancelCrawlerRun($run_token)
+    public function cancelProjectRun($run_token)
     {
-        $url = $this->getCrawlerRunCancelApiUrl($run_token);
+        $url = $this->getProjectRunCancelApiUrl($run_token);
         $api_key = self::$config['api_key'];
         $requestbody = 'api_key=' . $api_key;
 
@@ -191,7 +201,7 @@ class Parsehub
         ->send();
 
         if ($response->code == 200) {
-            self::$logger->info("Crawler canceled successfully on parsehub with run_token: $run_token");
+            self::$logger->info("Project run canceled successfully on parsehub with run_token: $run_token");
             $data = $response->body;
             return $data;
         }
@@ -204,10 +214,38 @@ class Parsehub
     }
 
     /**
+     * Delete a project run. This cancels a run if running, and deletes the run
+     * and its data.
+     * @param  string $run_token run token of a project run.
+     * @return string            json response with run token that run was
+     *                                deleted.
+     */
+    public function deleteProjectRun($run_token)
+    {
+        $url = $this->getProjectRunDeleteApiUrl($run_token);
+        $api_key = self::$config['api_key'];
+
+        $response = PHPHttpful::delete($url)
+        ->send();
+
+        if ($response->code == 200) {
+            self::$logger->info("Project deleted successfully on parsehub with run_token: $run_token");
+            $data = $response->body;
+            return $data;
+        }
+        if ($response->code == 401) {
+            self::$logger->error('Access denied. Not able to delete project on parsehub.');
+        }
+        if ($response->code == 400) {
+            self::$logger->error('Bad request. Not able to delete project on parsehub.');
+        }
+    }
+
+    /**
      * Get parsehub project list api url.
      * @return string REST api url for parsehub project list.
      */
-    public function getCrawlerListApiUrl()
+    public function getProjectListApiUrl()
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
@@ -220,7 +258,7 @@ class Parsehub
      * @param  string $project_token project information api url.
      * @return string                REST api url for parsehub project.
      */
-    public function getCrawlerApiUrl($project_token)
+    public function getProjectApiUrl($project_token)
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
@@ -233,7 +271,7 @@ class Parsehub
      * @param  string $run_token run token of a particular run.
      * @return string            REST api url for parsehub project run.
      */
-    public function getCrawlApiUrl($run_token)
+    public function getRunApiUrl($run_token)
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
@@ -242,11 +280,11 @@ class Parsehub
     }
 
     /**
-     * Get crawled data for a run.
+     * Get project run data for a run.
      * @param  string $run_token run token to get data.
      * @return string            REST api url for parsehub project run data.
      */
-    public function getCrawlerDataApiUrl($run_token)
+    public function getRunDataApiUrl($run_token)
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
@@ -269,13 +307,13 @@ class Parsehub
     }
 
     /**
-     * Get crawler run api url
+     * Get Project run api url
      * @param  string $project_token project token which project you want to
      *                               run.
      * @return string                REST api url for running a parsehub
      *                               project.
      */
-    public function getCrawlerRunApiUrl($project_token)
+    public function getProjectRunApiUrl($project_token)
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
@@ -284,15 +322,28 @@ class Parsehub
     }
 
     /**
-     * Cancel a running parsehub project.
+     * Get Cancel a running parsehub project api url.
      * @param  string $run_token run token to stop a run.
      * @return string            REST api url to cancel a run.
      */
-    public function getCrawlerRunCancelApiUrl($run_token)
+    public function getProjectRunCancelApiUrl($run_token)
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
         $url = $api_url . '/runs/' . $run_token . '/cancel';
+        return $url;
+    }
+
+    /**
+     * Get Delete a parsehub project run api url.
+     * @param  string $run_token run token to stop a run.
+     * @return string            REST api url to cancel a run.
+     */
+    public function getProjectRunDeleteApiUrl($run_token)
+    {
+        $api_key = self::$config['api_key'];
+        $api_url = self::$config['api_url'];
+        $url = $api_url . '/runs/' . $run_token . '?api_key=' . $api_key;;
         return $url;
     }
 }
