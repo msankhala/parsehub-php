@@ -1,6 +1,7 @@
 {
     "name": "msankhala/parsehub-php",
     "description": "Php wrapper classes for Parsehub REST api.",
+    "version" : "v1.0.0",
     "homepage": "http://msankhala.wordpress.com",
     "license": "MIT",
     "keywords": ["http", "curl", "rest", "restful", "api", "parsehub"],
