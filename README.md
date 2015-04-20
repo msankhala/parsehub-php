@@ -3,6 +3,13 @@
 Parsehub REST api wrapper class. Use this class to communicate with parsehub.
 This class uses [phphttpclient](http://phphttpclient.com) to communicate with parsehub.
 
+### installation
+You can either download, clone this repo or install via composer:
+
+```php
+composer require msankhala/parsehub-php
+```
+
 #### Features
 
 - Uses [phphttpclient](http://phphttpclient.com) class for making http requests.
