@@ -7,6 +7,6 @@
 .settings
 *.sublime-*
 .phpintel
-log/parsehub.log
+log/parsehub-local.log
 src/config.php
 index.php
