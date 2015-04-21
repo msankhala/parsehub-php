@@ -93,9 +93,9 @@ class Parsehub
      *                               to get information.
      * @return string                json response.
      */
-    public function getProject($project_token)
+    public function getProject($project_token, $offset = null)
     {
-        $url = $this->getProjectApiUrl($project_token);
+        $url = $this->getProjectApiUrl($project_token, $offset);
         $response = PHPHttpful::get($url)->send();
         $project = $response->body;
         return $project;
@@ -258,11 +258,14 @@ class Parsehub
      * @param  string $project_token project information api url.
      * @return string                REST api url for parsehub project.
      */
-    public function getProjectApiUrl($project_token)
+    public function getProjectApiUrl($project_token, $offset = null)
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
         $url = $api_url . '/projects/' . $project_token . '?api_key=' . $api_key;
+        if (isset($offset) && is_numeric($offset)) {
+            $url .= '&offset=' . $offset;
+        }
         return $url;
     }
 
@@ -343,7 +346,7 @@ class Parsehub
     {
         $api_key = self::$config['api_key'];
         $api_url = self::$config['api_url'];
-        $url = $api_url . '/runs/' . $run_token . '?api_key=' . $api_key;;
+        $url = $api_url . '/runs/' . $run_token . '?api_key=' . $api_key;
         return $url;
     }
 }
