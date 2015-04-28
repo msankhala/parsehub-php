@@ -158,15 +158,15 @@ class Parsehub
         ->send();
         if ($response->code == 200) {
             $run_object = json_decode($response->body);
-            if (!isset($run_object->start_time)) {
-                self::$logger->info('Project already running on parsehub with same values: ', ['context' => array(
+            if (isset($run_object->start_time)) {
+                self::$logger->info('Project run successfully on parsehub with values: ', ['context' => array(
                     'start_url' => $start_url,
                     'keywords' => $keywords,
                     'send_email' => $send_email,
                     'run_token' => $run_object->run_token,
                 )]);
             } else {
-                self::$logger->info('Project run successfully on parsehub with values: ', ['context' => array(
+                self::$logger->info('Project already running on parsehub with same values: ', ['context' => array(
                     'start_url' => $start_url,
                     'keywords' => $keywords,
                     'send_email' => $send_email,
