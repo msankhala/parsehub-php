@@ -52,7 +52,16 @@ class Parsehub
             return gzdecode($body);
         })
         ->send();
-        $response = $response->body;
+        if ($response->code == 200) {
+            $response = $response->body;
+            return $response;
+        }
+        if ($response->code == 401) {
+            self::$logger->error('Access denied. Not able to get data from parsehub.');
+        }
+        if ($response->code == 400) {
+            self::$logger->error('Bad request. Not able to get data from parsehub.');
+        }
         return $response;
     }
 
@@ -131,6 +140,7 @@ class Parsehub
         // Set query parameters to pass to Project.
         $start_url = isset($options['start_url']) ? $options['start_url'] : '';
         $keywords = isset($options['keywords']) ? explode(',', $options['keywords']) : array();
+        $keywords = array_map('trim', $keywords);
         $send_email = (isset($options['send_email']) && $options['send_email'] == 1) ? $options['send_email'] : 0;
         $requestbody = 'api_key=' . $api_key;
         if (!empty($start_url)) {
@@ -180,7 +190,7 @@ class Parsehub
             self::$logger->error('Access denied. Not able to run project on parsehub.');
         }
         if ($response->code == 400) {
-            self::$logger->info('Bad request. Not able to cancel project on parsehub.');
+            self::$logger->error('Bad request. Not able to run project on parsehub.');
         }
     }
 
