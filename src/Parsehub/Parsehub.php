@@ -24,11 +24,18 @@ class Parsehub
 
     /**
      * constructor.
+     * @todo Find a better way to manage config file.
      */
     public function __construct()
     {
         if (empty(self::$config)) {
-            self::$config = require_once __DIR__ . '/../config.php';
+            $confilg_file_path = __DIR__ . '/../config.php';
+            $default_config_file = __DIR__ . '/../config.default.php';
+            // Each time you update package you have to re-create config.php
+            // file again because Composer will delete whole package along with
+            // config file on updating this package and autoload generate will
+            // fail. So including default config file.
+            self::$config = require_once file_exists($confilg_file_path) ?  $confilg_file_path : $default_config_file;
         }
 
         if (empty(self::$logger)) {
