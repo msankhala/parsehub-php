@@ -1,4 +1,4 @@
-<?php 
+<?php
 namespace Parsehub;
 
 use Httpful\Request as PHPHttpful;
@@ -26,16 +26,16 @@ class Parsehub
      * constructor.
      * @todo Find a better way to manage config file.
      */
-    public function __construct()
+    public function __construct($api_key, $api_url = '', $logpath = '')
     {
         if (empty(self::$config)) {
-            $confilg_file_path = __DIR__ . '/../config.php';
-            $default_config_file = __DIR__ . '/../config.default.php';
-            // Each time you update package you have to re-create config.php
-            // file again because Composer will delete whole package along with
-            // config file on updating this package and autoload generate will
-            // fail. So including default config file.
-            self::$config = require_once file_exists($confilg_file_path) ?  $confilg_file_path : $default_config_file;
+            $logpath = empty($logpath) ? __DIR__ . '/../../log/parsehub.log' : $logpath;
+            $api_url = empty($api_url) ? 'https://www.parsehub.com/api/v2' : $api_url;
+            self::$config = array(
+                'api_key' => $api_key,
+                'log_path' => $logpath,
+                'api_url' => $api_url,
+            );
         }
 
         if (empty(self::$logger)) {
@@ -59,15 +59,9 @@ class Parsehub
             return gzdecode($body);
         })
         ->send();
-        if ($response->code == 200) {
+        if ($this->isResponseValid($response)) {
             $response = $response->body;
             return $response;
-        }
-        if ($response->code == 401) {
-            self::$logger->error('Access denied. Not able to get data from parsehub.');
-        }
-        if ($response->code == 400) {
-            self::$logger->error('Bad request. Not able to get data from parsehub.');
         }
         return $response;
     }
@@ -86,7 +80,11 @@ class Parsehub
             return gzdecode($body);
         })
         ->send();
-        $response = $response->body;
+
+        if ($this->isResponseValid($response)) {
+            $response = $response->body;
+            return $response;
+        }
         return $response;
     }
 
@@ -99,13 +97,16 @@ class Parsehub
     {
         $url = $this->getRunApiUrl($run_token);
         $response = PHPHttpful::get($url)->send();
-        $run = $response->body;
-        return $run;
+        if ($this->isResponseValid($response)) {
+            $run = $response->body;
+            return $run;
+        }
+        return $response;
     }
 
     /**
      * Get a project detail.
-     * @param  string $project_token project token for which project you want 
+     * @param  string $project_token project token for which project you want
      *                               to get information.
      * @return string                json response.
      */
@@ -113,8 +114,11 @@ class Parsehub
     {
         $url = $this->getProjectApiUrl($project_token, $offset);
         $response = PHPHttpful::get($url)->send();
-        $project = $response->body;
-        return $project;
+        if ($this->isResponseValid($response)) {
+            $project = $response->body;
+            return $project;
+        }
+        return $response;
     }
 
     /**
@@ -125,15 +129,18 @@ class Parsehub
     {
         $url = $this->getProjectListApiUrl();
         $response = PHPHttpful::get($url)->send();
-        $project_list = $response->body;
-        return $project_list;
+        if ($this->isResponseValid($response)) {
+            $project_list = $response->body;
+            return $project_list;
+        }
+        return $response;
     }
 
     /**
      * Run Project on parsehub.
      * @param  string $project_token project token which you want to run on parsehub.
      * @param  array  $options       Array of options which you want to pass.
-     *                               Options can have 
+     *                               Options can have
      *                               start_url = starting url,
      *                               keywords = comma separated list of keywords to search,
      *                               send_email = send email about run status.
@@ -173,7 +180,8 @@ class Parsehub
         ->addHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
         ->body($requestbody)
         ->send();
-        if ($response->code == 200) {
+
+        if ($this->isResponseValid($response)) {
             $run_object = json_decode($response->body);
             if (isset($run_object->start_time)) {
                 self::$logger->info('Project run successfully on parsehub with values: ', ['context' => array(
@@ -193,12 +201,7 @@ class Parsehub
             $data = $response->body;
             return $data;
         }
-        if ($response->code == 401) {
-            self::$logger->error('Access denied. Not able to run project on parsehub.');
-        }
-        if ($response->code == 400) {
-            self::$logger->error('Bad request. Not able to run project on parsehub.');
-        }
+        return $response;
     }
 
     /**
@@ -217,17 +220,12 @@ class Parsehub
         ->body($requestbody)
         ->send();
 
-        if ($response->code == 200) {
+        if ($this->isResponseValid($response)) {
             self::$logger->info("Project run canceled successfully on parsehub with run_token: $run_token");
             $data = $response->body;
             return $data;
         }
-        if ($response->code == 401) {
-            self::$logger->error('Access denied. Not able to cancel project on parsehub.');
-        }
-        if ($response->code == 400) {
-            self::$logger->error('Bad request. Not able to cancel project on parsehub.');
-        }
+        return $response;
     }
 
     /**
@@ -244,18 +242,40 @@ class Parsehub
 
         $response = PHPHttpful::delete($url)
         ->send();
-
-        if ($response->code == 200) {
-            self::$logger->info("Project deleted successfully on parsehub with run_token: $run_token");
+        if ($this->isResponseValid($response)) {
+            self::$logger->info("Project run deleted successfully on parsehub of run_token $run_token");
             $data = $response->body;
             return $data;
         }
-        if ($response->code == 401) {
-            self::$logger->error('Access denied. Not able to delete project on parsehub.');
+
+    }
+
+    public function isResponseValid($response)
+    {
+        switch ($response->code) {
+            case 200:
+                return true;
+                break;
+
+            case 400:
+                self::$logger->error('Bad request. Not able to get data from parsehub.');
+                break;
+
+            case 401:
+                self::$logger->error('Unauthorized access. Not able to get data from parsehub. Please check api key.');
+                return $response;
+                break;
+
+            case 403:
+                self::$logger->error('Forbidden. Not able to get data from parsehub. Please check api key.');
+                return $response;
+                break;
+
+            default:
+                # code...
+                break;
         }
-        if ($response->code == 400) {
-            self::$logger->error('Bad request. Not able to delete project on parsehub.');
-        }
+        return false;
     }
 
     /**
