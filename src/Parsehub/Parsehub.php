@@ -165,12 +165,15 @@ class Parsehub
             $start_value_override = '{"keywords":[';
             foreach ($keywords as $index => $keyword) {
                 if ($index === $last_keyword_index) {
-                    $start_value_override .= '"' . $keyword . '"';
+                    $start_value_override .= '"' . $keyword . '"' . "]";
                 } else {
                     $start_value_override .= '"' . $keyword . '"' . ",";
                 }
             }
-            $start_value_override .= ']}';
+            if (isset($options['page_limit'])) {
+                $start_value_override .= ',' . '"page_limit":' . $options['page_limit'];
+            }
+            $start_value_override .= '}';
             $requestbody .= '&start_value_override=' . urlencode($start_value_override);
         }
         if ($send_email) {
