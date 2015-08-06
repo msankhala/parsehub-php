@@ -186,19 +186,31 @@ class Parsehub
 
         if ($this->isResponseValid($response)) {
             $run_object = json_decode($response->body);
-            if (isset($run_object->start_time)) {
+            // If this is new run then parsehub return complete run object.
+            if (isset($run_object->project_token) && isset($run_object->run_token)) {
                 self::$logger->info('Project run successfully on parsehub with values: ', ['context' => array(
+                    'start_url' => $start_url,
+                    'keywords' => $keywords,
+                    'send_email' => $send_email,
+                    'run_token' => $run_object->run_token,
+                    'project_token' => $run_object->project_token,
+                )]);
+                // If crawler is running already for the same value then
+                // parsehub return run object only with run_token value.
+            } elseif (isset($run_object->run_token)) {
+                self::$logger->info('Project already running on parsehub with same values: ', ['context' => array(
                     'start_url' => $start_url,
                     'keywords' => $keywords,
                     'send_email' => $send_email,
                     'run_token' => $run_object->run_token,
                 )]);
             } else {
-                self::$logger->info('Project already running on parsehub with same values: ', ['context' => array(
+                self::$logger->info('Unable to start project on parsehub: ', ['context' => array(
                     'start_url' => $start_url,
                     'keywords' => $keywords,
-                    'send_email' => $send_email,
-                    'run_token' => $run_object->run_token,
+                    'project_token' => $project_token,
+                    'api_key' => $api_key,
+                    'requestbody_body' => $requestbody,
                 )]);
             }
             $data = $response->body;
