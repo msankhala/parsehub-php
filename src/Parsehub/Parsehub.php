@@ -4,6 +4,7 @@ namespace Parsehub;
 use Httpful\Request as PHPHttpful;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use Parsehub\Exception\HttpException;
 
 /**
  * Parsehub wrapper class.
@@ -53,6 +54,13 @@ class Parsehub
     public function getRunData($run_token)
     {
         $url = $this->getRunDataApiUrl($run_token);
+
+        //check url is valid and accessable
+        $status = $this->getHttpStatusCode($url);
+        if ($status >= 400) {
+            throw new HttpException($this->getHttpStatusMessage($status), $status);
+        }
+
         $response = PHPHttpful::get($url)
         ->parseWith(function ($body) {
             // Decode the gzip encoded respose.
@@ -74,6 +82,13 @@ class Parsehub
     public function getLastReadyRunData($project_token)
     {
         $url = $this->getLastReadyRunDataApiUrl($project_token);
+
+        //check url is valid and accessable
+        $status = $this->getHttpStatusCode($url);
+        if ($status >= 400) {
+            throw new HttpException($this->getHttpStatusMessage($status), $status);
+        }
+        
         $response = PHPHttpful::get($url)
         ->parseWith(function ($body) {
             // Decode the gzip encoded respose.
@@ -273,16 +288,16 @@ class Parsehub
                 break;
 
             case 400:
-                self::$logger->error('Bad request. Not able to get data from parsehub.');
+                self::$logger->error($this->getHttpStatusMessage($response->code));
                 break;
 
             case 401:
-                self::$logger->error('Unauthorized access. Not able to get data from parsehub. Please check api key.');
+                self::$logger->error($this->getHttpStatusMessage($response->code));
                 return $response;
                 break;
 
             case 403:
-                self::$logger->error('Forbidden. Not able to get data from parsehub. Please check api key.');
+                self::$logger->error($this->getHttpStatusMessage($response->code));
                 return $response;
                 break;
 
@@ -400,5 +415,41 @@ class Parsehub
         $api_url = self::$config['api_url'];
         $url = $api_url . '/runs/' . $run_token . '?api_key=' . $api_key;
         return $url;
+    }
+
+    /**
+    * Get http status code of url
+    * @param string $url url to check
+    * @return integer http status
+    */
+    public function getHttpStatusCode($url)
+    {
+        $handler = curl_init($url);
+        curl_setopt($handler,  CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($handler, CURLOPT_NOBODY, true);
+        curl_exec($handler);
+        return curl_getinfo($handler, CURLINFO_HTTP_CODE);
+    }
+
+    /**
+    * get Http status message
+    * @param integer $status http status code
+    * @return string status message
+    */
+    public function getHttpStatusMessage($status)
+    {
+        switch ($status) {
+            case 400:
+                return 'Bad request. Not able to get data from parsehub.';
+                break;
+
+            case 401:
+                return 'Unauthorized access. Not able to get data from parsehub. Please check api key.';
+                break;
+
+            case 403:
+                return 'Forbidden. Not able to get data from parsehub. Please check api key.';
+                break;
+        }
     }
 }
