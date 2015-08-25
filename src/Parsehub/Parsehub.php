@@ -424,11 +424,8 @@ class Parsehub
     */
     public function getHttpStatusCode($url)
     {
-        $handler = curl_init($url);
-        curl_setopt($handler,  CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($handler, CURLOPT_NOBODY, true);
-        curl_exec($handler);
-        return curl_getinfo($handler, CURLINFO_HTTP_CODE);
+        $response = PHPHttpful::head($url)->send();
+        return $response->code;
     }
 
     /**
