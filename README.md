@@ -1,7 +1,9 @@
 ### ParsehubPhp
 
 Parsehub REST api wrapper class. Use this class to communicate with parsehub.
-This class uses [phphttpclient](http://phphttpclient.com) to communicate with parsehub.
+This class uses [phphttpclient](http://phphttpclient.com) to communicate with
+parsehub and [monoglog](https://github.com/Seldaek/monolog) to make log entries
+about operation performed. See *Uses* section for log path and api url option.
 
 ### installation
 You can either download, clone this repo or install via composer:
@@ -22,6 +24,9 @@ Create Parsehub class Object to communicate with Parsehub, pass the `api_key`
 to parsehub class constructor. You can optionally pass `api_url` and `log_path`
 log file path as second and third arguments.
 
+`api_url` default value `https://www.parsehub.com/api/v2`
+`log_path` default value `<repo-root>/log/parsehub.log`
+
 Autoload Parsehub class:
 
 ```php
@@ -39,6 +44,17 @@ Get Parsehub projects list:
 ```php
 $api_key = <your-api-key>;
 $parsehub = new Parsehub($api_key);
+$projectList = $parsehub->getProjectList();
+echo $projectList;
+```
+
+or
+
+```php
+$api_key = <your-api-key>;
+$api_url = 'https://www.parsehub.com/api/v2';
+$log_path = 'path/to/parsehub.log';
+$parsehub = new Parsehub($api_key, $api_url, $log_path);
 $projectList = $parsehub->getProjectList();
 echo $projectList;
 ```
