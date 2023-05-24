@@ -146,9 +146,9 @@ class Parsehub
         $response = PHPHttpful::get($url)->send();
         if ($this->isResponseValid($response)) {
             $project_list = $response->body;
-            return $project_list;
+            return json_encode($project_list, JSON_PRETTY_PRINT);
         }
-        return $response;
+        return json_encode($response, JSON_PRETTY_PRINT);
     }
 
     /**
