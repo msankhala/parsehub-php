@@ -1,4 +1,5 @@
 <?php
+
 namespace Parsehub;
 
 use Httpful\Request as PHPHttpful;
@@ -49,7 +50,7 @@ class Parsehub
     /**
      * Get a data for a particular run of a parsehub project.
      * @param  string $run_token run token for which you want to get data.
-     * @return string            json response.
+     * @return object
      */
     public function getRunData($run_token)
     {
@@ -63,7 +64,7 @@ class Parsehub
 
         $response = PHPHttpful::get($url)
         ->parseWith(function ($body) {
-            // Decode the gzip encoded respose.
+            // Decode the gzip encoded response.
             return gzdecode($body);
         })
         ->send();
@@ -77,7 +78,7 @@ class Parsehub
     /**
      * Get the last ready run data for a project
      * @param  string $project_token project token to get last ready data for project
-     * @return string                json response.
+     * @return object
      */
     public function getLastReadyRunData($project_token)
     {
@@ -106,7 +107,7 @@ class Parsehub
     /**
      * Get a run object for a project.
      * @param  string $run_token run token whose run object you want to get.
-     * @return string            json response.
+     * @return object
      */
     public function getRun($run_token)
     {
@@ -121,9 +122,8 @@ class Parsehub
 
     /**
      * Get a project detail.
-     * @param  string $project_token project token for which project you want
-     *                               to get information.
-     * @return string                json response.
+     * @param  string $project_token project token for which project you want to get information.
+     * @return object
      */
     public function getProject($project_token, $offset = null)
     {
@@ -138,7 +138,7 @@ class Parsehub
 
     /**
      * Get list of all the parsehub project.
-     * @return string json response.
+     * @return object
      */
     public function getProjectList()
     {
@@ -146,9 +146,9 @@ class Parsehub
         $response = PHPHttpful::get($url)->send();
         if ($this->isResponseValid($response)) {
             $project_list = $response->body;
-            return json_encode($project_list, JSON_PRETTY_PRINT);
+            return $project_list;
         }
-        return json_encode($response, JSON_PRETTY_PRINT);
+        return $response;
     }
 
     /**
@@ -159,7 +159,7 @@ class Parsehub
      *                               start_url = starting url,
      *                               keywords = comma separated list of keywords to search,
      *                               send_email = send email about run status.
-     * @return string                run object if run successful otherwise return false.
+     * @return object                run object if run successful otherwise return false.
      */
     public function runProject($project_token, $options = array())
     {
@@ -228,7 +228,7 @@ class Parsehub
                     'requestbody_body' => $requestbody,
                 )]);
             }
-            $data = json_encode($response->body);
+            $data = $response->body;
             return $data;
         }
         return $response;
@@ -262,8 +262,7 @@ class Parsehub
      * Delete a project run. This cancels a run if running, and deletes the run
      * and its data.
      * @param  string $run_token run token of a project run.
-     * @return string            json response with run token that run was
-     *                                deleted.
+     * @return object json response with run token that run was deleted.
      */
     public function deleteProjectRun($run_token)
     {
@@ -275,7 +274,7 @@ class Parsehub
         if ($this->isResponseValid($response)) {
             self::$logger->info("Project run deleted successfully on parsehub of run_token $run_token");
             $data = $response->body;
-            return json_encode($data);
+            return $data;
         }
 
     }
