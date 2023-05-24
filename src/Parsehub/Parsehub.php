@@ -275,7 +275,7 @@ class Parsehub
         if ($this->isResponseValid($response)) {
             self::$logger->info("Project run deleted successfully on parsehub of run_token $run_token");
             $data = $response->body;
-            return json_encde($data);
+            return json_encode($data);
         }
 
     }
