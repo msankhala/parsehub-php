@@ -63,13 +63,16 @@ class Parsehub
         }
 
         $response = PHPHttpful::get($url)
-        ->parseWith(function ($body) {
-            // Decode the gzip encoded response.
-            return gzdecode($body);
-        })
-        ->send();
+            ->parseWith(function ($body) {
+                // Decode the gzip encoded response.
+                return gzdecode($body);
+            })
+            ->send();
         if ($this->isResponseValid($response)) {
-            $response = $response->body;
+            // $response->body is a String not JSON,
+            // hence PHPHttpful not able to parse it as json
+            // therfore have to do so here
+            $response = json_decode($response->body);
             return $response;
         }
         return $response;
@@ -89,16 +92,19 @@ class Parsehub
         if ($status >= 400) {
             throw new HttpException($this->getHttpStatusMessage($status), $status);
         }
-        
+
         $response = PHPHttpful::get($url)
-        ->parseWith(function ($body) {
-            // Decode the gzip encoded respose.
-            return gzdecode($body);
-        })
-        ->send();
+            ->parseWith(function ($body) {
+                // Decode the gzip encoded respose.
+                return gzdecode($body);
+            })
+            ->send();
 
         if ($this->isResponseValid($response)) {
-            $response = $response->body;
+            // $response->body is a String not JSON,
+            // hence PHPHttpful not able to parse it as json
+            // therfore have to do so here
+            $response = json_decode($response->body);
             return $response;
         }
         return $response;
@@ -138,7 +144,7 @@ class Parsehub
 
     /**
      * Get list of all the parsehub project.
-     * @return object
+     * @return object Std class object
      */
     public function getProjectList()
     {
@@ -195,9 +201,9 @@ class Parsehub
             $requestbody .= '&send_email=' . urlencode($send_email);
         }
         $response = PHPHttpful::post($url)
-        ->addHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
-        ->body($requestbody)
-        ->send();
+            ->addHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
+            ->body($requestbody)
+            ->send();
 
         if ($this->isResponseValid($response)) {
             $run_object = $response->body;
@@ -228,8 +234,9 @@ class Parsehub
                     'requestbody_body' => $requestbody,
                 )]);
             }
-            $data = $response->body;
-            return $data;
+
+            $response = $response->body;
+            return $response;
         }
         return $response;
     }
@@ -246,9 +253,9 @@ class Parsehub
         $requestbody = 'api_key=' . $api_key;
 
         $response = PHPHttpful::post($url)
-        ->addHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
-        ->body($requestbody)
-        ->send();
+            ->addHeader('Content-Type', 'application/x-www-form-urlencoded; charset=utf-8')
+            ->body($requestbody)
+            ->send();
 
         if ($this->isResponseValid($response)) {
             self::$logger->info("Project run canceled successfully on parsehub with run_token: $run_token");
@@ -259,7 +266,7 @@ class Parsehub
     }
 
     /**
-     * Delete a project run. This cancels a run if running, and deletes the run
+     * Delete a project run. This cancels a run if running, and deletes the run.
      * and its data.
      * @param  string $run_token run token of a project run.
      * @return object json response with run token that run was deleted.
@@ -270,13 +277,13 @@ class Parsehub
         $api_key = self::$config['api_key'];
 
         $response = PHPHttpful::delete($url)
-        ->send();
+            ->send();
         if ($this->isResponseValid($response)) {
             self::$logger->info("Project run deleted successfully on parsehub of run_token $run_token");
             $data = $response->body;
             return $data;
         }
-
+        return $response;
     }
 
     public function isResponseValid($response)
@@ -284,7 +291,6 @@ class Parsehub
         switch ($response->code) {
             case 200:
                 return true;
-                break;
 
             case 400:
                 self::$logger->error($this->getHttpStatusMessage($response->code));
@@ -293,12 +299,10 @@ class Parsehub
             case 401:
                 self::$logger->error($this->getHttpStatusMessage($response->code));
                 return $response;
-                break;
 
             case 403:
                 self::$logger->error($this->getHttpStatusMessage($response->code));
                 return $response;
-                break;
 
             default:
                 # code...
@@ -417,10 +421,10 @@ class Parsehub
     }
 
     /**
-    * Get http status code of url
-    * @param string $url url to check
-    * @return integer http status
-    */
+     * Get http status code of url
+     * @param string $url url to check
+     * @return integer http status
+     */
     public function getHttpStatusCode($url)
     {
         $response = PHPHttpful::head($url)->send();
@@ -428,24 +432,24 @@ class Parsehub
     }
 
     /**
-    * get Http status message
-    * @param integer $status http status code
-    * @return string status message
-    */
+     * get Http status message
+     * @param integer $status http status code
+     * @return string status message
+     */
     public function getHttpStatusMessage($status)
     {
         switch ($status) {
             case 400:
                 return 'Bad request. Not able to get data from parsehub.';
-                break;
 
             case 401:
                 return 'Unauthorized access. Not able to get data from parsehub. Please check api key.';
-                break;
 
             case 403:
                 return 'Forbidden. Not able to get data from parsehub. Please check api key.';
-                break;
+
+            default:
+                return 'Error.';
         }
     }
 }
