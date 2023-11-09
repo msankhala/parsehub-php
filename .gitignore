@@ -9,4 +9,4 @@
 .phpintel
 log/parsehub-local.log
 src/config.php
-index.php
+config.php
