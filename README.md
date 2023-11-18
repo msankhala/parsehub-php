@@ -17,6 +17,7 @@ composer require msankhala/parsehub-php
 - Uses [phphttpclient](http://phphttpclient.com) class for making http requests.
 - This class also support basic logging using monolog.
 - This class use `PSR-0` autoload.
+- All functions returns a PHP std class Object.
 
 #### Uses
 
@@ -45,7 +46,7 @@ Get Parsehub projects list:
 $api_key = <your-api-key>;
 $parsehub = new Parsehub($api_key);
 $projectList = $parsehub->getProjectList();
-echo $projectList;
+print_r($projectList);
 ```
 
 or
@@ -56,7 +57,7 @@ $api_url = 'https://www.parsehub.com/api/v2';
 $log_path = 'path/to/parsehub.log';
 $parsehub = new Parsehub($api_key, $api_url, $log_path);
 $projectList = $parsehub->getProjectList();
-echo $projectList;
+print_r($projectList);
 ```
 
 ```php
@@ -69,7 +70,7 @@ Get particular Parsehub project, Pass the project_token:
 ```php
 $parsehub = new Parsehub($api_key);
 $project = $parsehub->getProject($project_token);
-echo $project;
+print_r($project);
 ```
 
 Get Last ready run Data for a project:
@@ -106,7 +107,7 @@ $options = array(
     'send_email' => 1,
 );
 $run_obj = $parsehub->runProject($project_token, $options);
-echo $run_obj;
+print_r($run_obj);
 ```
 Cancel a parsehub project run:
 ```php
